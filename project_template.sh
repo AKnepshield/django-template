@@ -3,7 +3,7 @@
 echo "Enter a single word to prefix your project name and API app name:"
 read -p "> " PROJECT_NAME
 
-echo "Enter the SSH address for your GitHub repository:"
+echo "Enter the SSH address for your Github repository:"
 read -p "> " REPO_NAME
 
 curl -L -s 'https://raw.githubusercontent.com/github/gitignore/master/Python.gitignore' > .gitignore
@@ -13,8 +13,8 @@ django-admin startproject ${PROJECT_NAME}project .
 python3 manage.py startapp ${PROJECT_NAME}api
 mkdir ./.vscode
 mkdir ./${PROJECT_NAME}api/fixtures
-touch ./${PROJECT_NAME}api/fixtures/tokens.json
 touch ./${PROJECT_NAME}api/fixtures/users.json
+touch ./${PROJECT_NAME}api/fixtures/tokens.json
 mkdir ./${PROJECT_NAME}api/models
 touch ./${PROJECT_NAME}api/models/__init__.py
 mkdir ./${PROJECT_NAME}api/views
@@ -187,6 +187,7 @@ echo '
     }
   }
 ]
+
 ' > ./${PROJECT_NAME}api/fixtures/tokens.json
 
 echo '
@@ -222,7 +223,7 @@ def login_user(request):
         data = {"valid": True, "token": token.key}
         return Response(data)
     else:
-        # Bad login details were provided. So we cannot log the user in.
+        # Bad login details were provided. So we cant log the user in.
         data = {"valid": False}
         return Response(data)
 
@@ -235,10 +236,10 @@ def register_user(request):
     Method arguments:
       request -- The full HTTP request object
     """
-    email = request.data.get('email', None)
-    first_name = request.data.get('first_name', None)
-    last_name = request.data.get('last_name', None)
-    password = request.data.get('password', None)
+    email = request.data.get("email", None)
+    first_name = request.data.get("first_name", None)
+    last_name = request.data.get("last_name", None)
+    password = request.data.get("password", None)
 
     if (
         email is not None
@@ -251,11 +252,11 @@ def register_user(request):
             # Create a new user by invoking the `create_user` helper method
             # on Djangos built-in User model
             new_user = User.objects.create_user(
-                username=request.data['email'],
-                email=request.data['email'],
-                password=request.data['password'],
-                first_name=request.data['first_name'],
-                last_name=request.data['last_name'],
+                username=request.data["email"],
+                email=request.data["email"],
+                password=request.data["password"],
+                first_name=request.data["first_name"],
+                last_name=request.data["last_name"],
             )
         except IntegrityError:
             return Response(
@@ -278,7 +279,7 @@ def register_user(request):
 @api_view(["GET"])
 @permission_classes([AllowAny])
 def get_current_user(request):
-    """Handle GET requests for single item
+    """Handle GET requests for single user
 
     Returns:
         Response -- JSON serialized instance
@@ -304,10 +305,13 @@ class UserSerializer(serializers.ModelSerializer):
             "firstName",
             "lastName",
             "username",
-        )' > ./${PROJECT_NAME}api/views/auth.py
+        )
+
+' > ./${PROJECT_NAME}api/views/auth.py
 
 echo '
 from .auth import login_user, register_user, get_current_user
+
 ' > ./${PROJECT_NAME}api/views/__init__.py
 
 echo '{
@@ -474,17 +478,23 @@ STATIC_URL = 'static/'
 DEFAULT_AUTO_FIELD = 'django.db.models.BigAutoField'
 " > ./${PROJECT_NAME}project/settings.py
 
-echo "from django.contrib import admin
+echo "
+from django.contrib import admin
 from django.urls import include, path
 from rest_framework import routers
+from ${PROJECT_NAME}api.views import (
+    register_user,
+    login_user,
+    get_current_user,
+    )
 
 router = routers.DefaultRouter(trailing_slash=False)
 
 urlpatterns = [
     path('', include(router.urls)),
-    path("register", register_user),
-    path("login", login_user),
-    path("current_user", get_current_user),
+    path('register', register_user),
+    path('login', login_user),
+    path('current_user', get_current_user),
 ]
 " > ./${PROJECT_NAME}project/urls.py
 
@@ -513,11 +523,11 @@ echo '[FORMAT]
 ' > .pylintrc
 
 pipenv run bash -c "python3 manage.py migrate"
-git init --initial-branch=main
-git remote add origin ${REPO_NAME}
-git branch -M main
+git init
 git add --all
 git commit -m "Initial commit"
+git branch -M main
+git remote add origin ${REPO_NAME}
 git push -u origin main
 
 echo "**********************************"
